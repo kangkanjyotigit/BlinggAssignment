@@ -34,14 +34,20 @@ app.use(function(req,res,next){
 
 app.get('/',async (req,res)=>{
 
-     var result = await client.query('SELECT * from banners,details where Image = name').then(res=>{return res;});
-    console.log(result.rows);
+     var result = await client.query('SELECT * from banners,details where Image = name')
+     .then(res=>{return res;})
+     .catch(err=>{console.log('There has been an error' + err)})
+     ;
     res.send(result.rows);
 
 })
-app.post('/DataPost',(req,res)=>{
+app.post('/DataPost',async(req,res)=>{
     var data = req.body;
-    console.log('The data recieved' + data.name);
-    client.query('Insert into details values(data.name,data.description,data.url)').then(res=>{console.log('success',res)});
+    client.query('INSERT into details(name,description,url) values($1,$2,$3)',[data.name,data.description,data.url])
+    .then(res=>{console.log('insert done')})
+    .catch(err=>{console.log('There has been an error' + err)});
+    
+    client.query('INSERT into banners(image) values($1)',[data.name]).then(res=>{console.log('insert done')});
+    
 })
 
